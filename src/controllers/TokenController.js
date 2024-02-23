@@ -40,12 +40,17 @@ class TokenController {
       }
 
       // Gerar o token
-      const token = jwt.sign({ id: user.id, email: user.email }, process.env.TOKEN_SECRET, { // Enviamos o user.id e user.email para que possamos identificar de qual usuário pertence o token através do id e email presentes no token
-        expiresIn: process.env.TOKEN_EXPIRATION,
-      });
+      // const token = jwt.sign({ id: user.id, email: user.email }, process.env.TOKEN_SECRET, { // Enviamos o user.id e user.email para que possamos identificar de qual usuário pertence o token através do id e email presentes no token
+      //   expiresIn: process.env.TOKEN_EXPIRATION,
+      // });
+
+      // return res.json({
+      //   token,
+      // });
 
       return res.json({
-        token,
+        senha: process.env.TOKEN_SECRET,
+        expiração: process.env.TOKEN_EXPIRATION,
       });
     } catch (e) {
       return res.status(400).json({
