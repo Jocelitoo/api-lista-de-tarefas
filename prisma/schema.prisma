@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Model que armazena os usuários
+model User {
+  id        Int      @id @default(autoincrement()) // @id --> ID é uma PrimaryKey , @default(autoincrement()) --> ID será gerado automaticamente
+  name      String   @unique // @unique vai impedir nomes repetidos
+  email     String   @unique // @unique vai impedir emails repetidos
+  password  String
+  createdAt DateTime @default(now()) // DateTime --> Pega a data , @default(now()) --> A data será a atual
+  updatedAt DateTime @updatedAt // @updatedAt --> Quando fizer um update usando o prisma, o campo updatedAt será preenchido com a data atual
+
+  fotos Foto[] // Relaciona a tabela User com a tabela Foto
+
+  @@map("users") // Renomeia o nome da tabela de User para users
+}
+
+// Model que armazena as tarefas(tasks)
+model Task {
+  id      Int    @id @default(autoincrement()) // @id --> ID é uma PrimaryKey , @default(autoincrement()) --> ID será gerado automaticamente
+  ownerId Int // id do usuário que vai criar a task(tarefa)
+  content String // conteúdo da task(tarefa)
+
+  @@map("tasks") // Renomeia o nome da tabela de Task para tasks
+}
+
+// Model que armazena as fotos
+model Foto {
+  id           Int    @id @default(autoincrement()) // @id --> ID é uma PrimaryKey , @default(autoincrement()) --> ID será gerado automaticamente
+  originalname String
+  filename     String
+  ownerId      Int
+  url          String
+
+  user User? @relation(fields: [ownerId], references: [id]) // ownerId da tabela Foto está relacionado a id da tabela User
+
+  @@map("fotos") // Renomeia o nome da tabela de Foto para fotos
+}
