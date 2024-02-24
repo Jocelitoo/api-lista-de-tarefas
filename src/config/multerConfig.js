@@ -13,7 +13,7 @@ export default {
   },
   storage: multer.diskStorage({
     destination: (req, file, callback) => {
-      callback(null, resolve(__dirname, '..', '..', 'tmp', 'uploads', 'images')); // callback(se erro: null, se sucesso: caminho da pasta que vai receber o arquivo)
+      callback(null, resolve(__dirname, '..', '..', 'uploads', 'images')); // callback(se erro: null, se sucesso: caminho da pasta que vai receber o arquivo)
     },
     filename: (req, file, callback) => {
       callback(null, `${Date.now()}_${aleatorio()}${extname(file.originalname)}`); // callback(se erro: null, se sucesso: novo nome do arquivo --> O nome do arquivo vai ser a data que foi enviado + numero aleatório + extname vai pegar a extensão(EX: .JPG, .PNG,...))
