@@ -11,7 +11,7 @@ const port = process.env.PORT ?? 4000;
 
 app.use(express.json()); // Usado para fazer o express realizar o parse de JSON para dentro da aplicação
 app.use(routes);
-app.use('/images', express.static(resolve(__dirname, '..', 'tmp', 'uploads', 'images'))); // Usado para permitir acessar a URL das imagens salvas na base de dados
+app.use('/tmp', express.static(resolve(__dirname, '..', 'tmp', 'uploads', 'images'))); // Usado para permitir acessar a URL das imagens salvas na base de dados
 app.use(express.urlencoded({ extended: true })); // Usado para fazer o express retornar um objeto com os dados que receberam post, sem ele o sistema da erro na hora da criação do token quando a api está no ar
 
 app.listen(port, () => console.log(`Servidor rodando na porta ${port}`));
