@@ -1,12 +1,10 @@
-import multer from 'multer';
-import multerConfig from '../config/multerConfig';
 import { prisma } from '../client';
-
-const upload = multer(multerConfig).single('foto'); // single('foto') --> Só pode ser enviado um arquivo por vez e 'foto' é o nome dado no insomnia, ele tmb habilita o req.file para poder pegarmos os dados do arquivo enviados na requisição
+import { uploader } from '../config/multerConfig';
+import { destroyFile, uploadFile } from '../config/cloudinary';
 
 class FotoController {
-  async store(req, res) { // É store pq recebemos os dados da img serão salvos na base de dados
-    return upload(req, res, async (error) => {
+  async store(req, res) {
+    return uploader(req, res, async (error) => {
       if (error) { // Verifica se tem algum error, se houver o IF será executado e a function ira parar aqui
         return res.status(400).json({ // Envia o status 400(Bad Request) e escreve o erro na tela por meio do json
           errors: [error],
@@ -14,43 +12,85 @@ class FotoController {
       }
 
       try {
-        const reqOwnerId = req.userId; // Pega o id do usuário que está fazendo a requisição enviado pelo middleware
-        const reqOriginalname = req.file.originalname; // Pega o originalname enviado no file(arquivo) da requisição
-        const reqFilename = req.file.filename; // Pega o filename enviado no file(arquivo) da requisição
+        const filePath = req.file.path; // Pega o path do file da requisição
 
-        // Verificar se o user que está fazendo a requisição existe
-        const user = await prisma.user.findUnique({ // Pega o usuário que tem o id com o mesmo valor de reqOwnerId e pega as fotos vinculadas a esse usuário
-          where: { id: reqOwnerId },
-          select: { fotos: true },
-        });
+        // Verificar se o usuário existe
+        const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { fotos: true } });
 
         if (!user) {
           return res.status(400).json({
-            Error: ['Usuário não existe'],
+            error: ['Usuário não existe'],
           });
         }
 
-        // Verificar se já existe alguma foto, se houver alguma foto deletamos
+        // Verificar se o usuário já tem 1 foto, se tiver vamos destruir a antiga foto do cloudinary e da base de dados
         if (user.fotos.length > 0) {
-          await prisma.foto.deleteMany({ where: { ownerId: reqOwnerId } }); // Deleta a foto que tem ownerId com o mesmo valor de reqOwnerId
+          const picPublicID = user.fotos[0].public_id; // Pega o public_id da imagem
+          await destroyFile(picPublicID); // Usa o public_id para destruir a img no cloudinary
+          await prisma.foto.deleteMany({ where: { ownerId: req.userId } }); // Deleta todas as fotos que tiverem o ownerId com o mesmo valor do req.userId(id do usuário que está fazendo a requisição)
         }
 
-        // Criar foto
+        // Enviar imagem para o cloudinary
+        const upload = await uploadFile(filePath); // Faz o upload do arquivo no cloudinary
+
+        // Criar na base de dados a img
         const foto = await prisma.foto.create({
           data: {
-            originalname: reqOriginalname,
-            filename: reqFilename,
-            ownerId: reqOwnerId,
+            ownerId: req.userId,
+            url: upload.secure_url,
+            public_id: upload.public_id,
           },
         });
 
-        return res.json(foto);
+        return res.send({
+          sucess: true,
+          msg: 'File uploaded',
+          dados: foto,
+        });
       } catch (e) {
-        return res.status(400).json({
-          Error: ['Ocorreu um erro'],
+        return res.send({
+          sucess: false,
+          msg: e.message,
         });
       }
     });
+  }
+
+  async delete(req, res) {
+    try {
+      // Verificar se o usuário existe
+      const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { fotos: true } }); // Verifica se tem algum usuário que tenha o id com o msm valor de req.userId(id do usuário que fez a requisição) e especifica que quer os dados da tabela foto vinculada a esse usuário
+
+      if (!user) {
+        return res.status(400).json({
+          error: ['Usuário não existe'],
+        });
+      }
+
+      // Verificar se o usuário tem alguma foto
+      if (user.fotos.length === 0) {
+        return res.status(400).send({
+          msg: 'Usuário não tem foto para ser apagada',
+        });
+      }
+
+      // Pegar o public_id da img para apaga-lá
+      const picPublicID = user.fotos[0].public_id; // Pega o public_id da imagem
+
+      // Apagar a img no cloudinary e na base de dados
+      await destroyFile(picPublicID); // Usa o public_id para destruir a img no cloudinary
+      await prisma.foto.deleteMany({ where: { ownerId: req.userId } }); // Deleta da base de dados a foto que tem o ownerId com o mesmo valor de req.userId(id do usuário que fez a requisição)
+
+      return res.send({
+        sucess: true,
+        msg: 'Foto apagada',
+      });
+    } catch (e) {
+      return res.status(400).send({
+        sucess: false,
+        msg: e.message,
+      });
+    }
   }
 }
 

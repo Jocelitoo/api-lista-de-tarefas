@@ -68,8 +68,8 @@ class UserController {
           email: true,
           fotos: {
             select: {
-              filename: true,
               url: true,
+              public_id: true,
             },
           },
         },
@@ -119,8 +119,8 @@ class UserController {
           email: true,
           fotos: {
             select: {
-              filename: true,
               url: true,
+              public_id: true,
             },
           },
         },

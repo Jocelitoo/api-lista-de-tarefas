@@ -22,10 +22,9 @@ CREATE TABLE "tasks" (
 -- CreateTable
 CREATE TABLE "fotos" (
     "id" SERIAL NOT NULL,
-    "originalname" TEXT NOT NULL,
-    "filename" TEXT NOT NULL,
     "ownerId" INTEGER NOT NULL,
     "url" TEXT NOT NULL,
+    "public_id" TEXT NOT NULL,
 
     CONSTRAINT "fotos_pkey" PRIMARY KEY ("id")
 );

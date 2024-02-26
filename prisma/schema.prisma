@@ -39,10 +39,9 @@ model Task {
 // Model que armazena as fotos
 model Foto {
   id           Int    @id @default(autoincrement()) // @id --> ID é uma PrimaryKey , @default(autoincrement()) --> ID será gerado automaticamente
-  originalname String
-  filename     String
   ownerId      Int
   url          String
+  public_id    String
 
   user User? @relation(fields: [ownerId], references: [id]) // ownerId da tabela Foto está relacionado a id da tabela User
 
