@@ -1,7 +1,6 @@
-/* eslint-disable prefer-promise-reject-errors */
-import cloudinary from 'cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 
-export const cloudinaryConfig = cloudinary.v2.config({
+cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
@@ -9,19 +8,19 @@ export const cloudinaryConfig = cloudinary.v2.config({
 
 export const uploadFile = async (filePath) => {
   try {
-    const result = await cloudinary.v2.uploader.upload(filePath);
-    console.log(result);
-    return result;
+    return await cloudinary.uploader.upload(filePath, (error, result) => {
+      console.log(error, result); // Se houver um erro, 'error' retornará o erro e result retornará undefined. Se der tudo certo, result retornará os dados do resultado e error retornará undefined
+    });
   } catch (e) {
     return console.log(e.message);
   }
 };
 
-export const destroyFile = async (picUrl) => {
+export const destroyFile = async (picPublicID) => {
   try {
-    const result = await cloudinary.v2.uploader.destroy(picUrl);
-    console.log(result);
-    return result;
+    return await cloudinary.uploader.destroy(picPublicID, (error, result) => {
+      console.log(error, result); // Se houver um erro, 'error' retornará o erro e 'result' retornará undefined. Se der tudo certo, 'result' retornará os dados do resultado e 'error' retornará undefined
+    });
   } catch (e) {
     return console.log(e.message);
   }
