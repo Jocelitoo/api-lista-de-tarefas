@@ -46,10 +46,16 @@ class TokenController {
 
       return res.json({
         token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
       });
     } catch (e) {
       return res.status(400).json({
-        error: ['Ocorreu um erro'],
+        sucess: false,
+        msg: e.message,
       });
     }
   }

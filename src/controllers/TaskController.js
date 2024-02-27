@@ -33,7 +33,8 @@ class TaskController {
       return res.json(task);
     } catch (e) {
       return res.status(400).json({
-        error: ['Ocorreu um erro'],
+        sucess: false,
+        msg: e.message,
       });
     }
   }
@@ -48,13 +49,11 @@ class TaskController {
         });
       }
 
-      console.log(`UserId: ${req.userId}`);
-      console.log(`UserEmail: ${req.userEmail}`);
-
       return res.json(tasks);
     } catch (e) {
       return res.status(400).json({
-        error: ['Ocorreu um erro'],
+        sucess: false,
+        msg: e.message,
       });
     }
   }
@@ -75,14 +74,15 @@ class TaskController {
       return res.json(task);
     } catch (e) {
       return res.status(400).json({
-        error: ['Ocorreu um erro'],
+        sucess: false,
+        msg: e.message,
       });
     }
   }
 
   async update(req, res) {
     try {
-      const { userId } = req; // Pega o id do usuário que está fazendo a requisição, enviado pelo middleware
+      const loggedUserId = req.userId; // Pega o id do usuário que está fazendo a requisição, enviado pelo middleware
       const reqId = parseInt(req.params.id); // Pega o id enviado no parâmetro(URL) da requisição, por ele vim como STRING e a base de dados só receber o id como inteiro, usamos o parseInt
       const reqContent = req.body.content; // Pega o content enviado no body da requisição
 
@@ -103,7 +103,7 @@ class TaskController {
       }
 
       // Verificar se a task(tarefa) a ser atualizada pertence ao usuário que está fazendo a requisição
-      if (userId !== task.ownerId) {
+      if (loggedUserId !== task.ownerId) {
         return res.status(401).json({
           Error: ['Tarefa não encontrada'],
         });
@@ -115,14 +115,15 @@ class TaskController {
       return res.json(taskUpdated);
     } catch (e) {
       return res.status(400).json({
-        error: ['Ocorreu um erro'],
+        sucess: false,
+        msg: e.message,
       });
     }
   }
 
   async delete(req, res) {
     try {
-      const { userId } = req; // Pega o id do usuário que está fazendo a requisição, enviado pelo middleware
+      const loggedUserId = req.userId; // Pega o id do usuário que está fazendo a requisição, enviado pelo middleware
       const reqId = parseInt(req.params.id); // Pega o id enviado no parâmetro(URL) da requisição, por ele vim como STRING e a base de dados só receber o id como inteiro, usamos o parseInt
 
       // Verificar se a task(tarefa) existe
@@ -135,7 +136,7 @@ class TaskController {
       }
 
       // Verificar se a task(tarefa) a ser deletada pertence ao usuário que está fazendo a requisição
-      if (userId !== task.ownerId) {
+      if (loggedUserId !== task.ownerId) {
         return res.status(401).json({
           Error: ['Tarefa não encontrada'],
         });
@@ -149,7 +150,8 @@ class TaskController {
       });
     } catch (e) {
       return res.status(400).json({
-        error: ['Ocorreu um erro'],
+        sucess: false,
+        msg: e.message,
       });
     }
   }

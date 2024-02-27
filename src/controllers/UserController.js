@@ -1,6 +1,7 @@
 import bcryptjs from 'bcryptjs';
 import { isEmail } from 'validator';
 import { prisma } from '../client';
+import { destroyFile } from '../config/cloudinary';
 
 class UserController {
   async store(req, res) {
@@ -54,7 +55,8 @@ class UserController {
       });
     } catch (e) {
       return res.status(400).json({
-        error: ['Ocorreu um erro'],
+        sucess: false,
+        msg: e.message,
       });
     }
   }
@@ -66,6 +68,12 @@ class UserController {
           id: true,
           name: true,
           email: true,
+          tasks: {
+            select: {
+              id: true,
+              content: true,
+            },
+          },
           fotos: {
             select: {
               url: true,
@@ -84,24 +92,11 @@ class UserController {
         });
       }
 
-      // Pegar individualmente cada usuário do array users para buscar na base de dados seu array de tarefas e dps juntar o usuário e suas tarefas em um só bloco
-      const response = [];
-
-      const promises = users.map(async (user) => {
-        const tasks = await prisma.task.findMany({ where: { ownerId: user.id }, select: { id: true, content: true } }); // Prisma acessa o model(tabela) 'task' e pega todas as tarefas que tem o ownerID com o mesmo valor do user.id e select vai pegar somento id e content
-
-        response.push({
-          usuário: user,
-          tarefas: tasks,
-        });
-      });
-
-      await Promise.all(promises); // O map n espera o await ser concluido, então usamos esse código para que a function só continue executando dps que as promises forem concluidas
-
-      return res.json(response);
+      return res.json(users);
     } catch (e) {
       return res.status(400).json({
-        error: ['Ocorreu um erro'],
+        sucess: false,
+        msg: e.message,
       });
     }
   }
@@ -117,6 +112,12 @@ class UserController {
           id: true,
           name: true,
           email: true,
+          tasks: {
+            select: {
+              id: true,
+              content: true,
+            },
+          },
           fotos: {
             select: {
               url: true,
@@ -141,14 +142,15 @@ class UserController {
       });
     } catch (e) {
       return res.status(400).json({
-        error: ['Ocorreu um erro'],
+        sucess: false,
+        msg: e.message,
       });
     }
   }
 
   async update(req, res) {
     try {
-      const reqId = req.userId; // Pega o id do usuário que está fazendo a requisição, enviado pelo middleware
+      const loggedUserId = req.userId; // Pega o id do usuário que está fazendo a requisição, enviado pelo middleware
       const reqName = req.body.name; // Pega o 'name' enviado no body da requisição
       const reqEmail = req.body.email; // Pega o 'email' enviado no body da requisição
       const reqPassword = req.body.password; // Pega o 'password' enviado no body da requisição
@@ -168,7 +170,7 @@ class UserController {
 
       // Verificar se o usuário existe
       const user = await prisma.user.findUnique({
-        where: { id: reqId },
+        where: { id: loggedUserId },
         select: {
           id: true, name: true, email: true, password: true,
         },
@@ -199,7 +201,7 @@ class UserController {
 
       // Atualizar usuario
       const updateUser = await prisma.user.update({
-        where: { id: reqId },
+        where: { id: user.id },
         data: { name: reqName, email: reqEmail, password: reqPasswordHash },
         select: {
           id: true, name: true, email: true,
@@ -209,17 +211,23 @@ class UserController {
       return res.json(updateUser);
     } catch (e) {
       return res.status(400).json({
-        error: ['Ocorreu um erro'],
+        sucess: false,
+        msg: e.message,
       });
     }
   }
 
   async delete(req, res) {
     try {
-      const reqId = req.userId; // Pega o id do usuário que está fazendo a requisição, enviado pelo middleware
+      const loggedUserId = req.userId; // Pega o id do usuário que está fazendo a requisição, enviado pelo middleware
 
       // Verificar se o usuário existe
-      const user = await prisma.user.findUnique({ where: { id: reqId } });
+      const user = await prisma.user.findUnique({
+        where: { id: loggedUserId },
+        select: {
+          id: true, name: true, tasks: true, fotos: true,
+        },
+      });
 
       if (!user) {
         return res.status(400).json({
@@ -227,23 +235,29 @@ class UserController {
         });
       }
 
-      // Pegar todas as tasks(tarefas) que possuam o ownerId com o mesmo valor do id passado no parametro
-      const tasks = await prisma.task.findMany({ where: { ownerId: reqId } });
+      // Deletar as tasks do usuário
+      if (user.tasks.length > 0) {
+        await prisma.task.deleteMany({ where: { ownerId: user.id } });
+      }
+
+      // Deletar as fotos do cloudinary e da base de dados
+      if (user.fotos.length > 0) {
+        const picPublicID = user.fotos[0].public_id; // Pega o public_id da imagem
+
+        await destroyFile(picPublicID); // Usa o public_id para destruir a img no cloudinary
+        await prisma.foto.deleteMany({ where: { ownerId: user.id } }); // Deleta todas as fotos que tiverem o ownerId com o mesmo valor do user.id(id do usuário que está fazendo a requisição)
+      }
 
       // Deletar usuário
-      await prisma.user.delete({ where: { id: reqId } }); // Deleta o usuário que tenha o id com o mesmo valor do reqId
-
-      // Deletar todas as tasks(tarefas) pertencentes a esse usuário deletado
-      if (tasks.length > 0) {
-        await prisma.task.deleteMany({ where: { ownerId: reqId } }); // Deleta todas as tasks(tarefas) que tenham o ownerId com o mesmo valor do reqId
-      }
+      await prisma.user.delete({ where: { id: user.id } }); // Deleta o usuário que tenha o id com o mesmo valor do user.id
 
       return res.json({
         Sucesso: [`Usuário de nome ${user.name} deletado`],
       });
     } catch (e) {
       return res.status(400).json({
-        error: ['Ocorreu um erro'],
+        sucess: false,
+        msg: e.message,
       });
     }
   }

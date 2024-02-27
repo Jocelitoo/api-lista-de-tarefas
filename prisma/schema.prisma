@@ -22,6 +22,7 @@ model User {
   createdAt DateTime @default(now()) // DateTime --> Pega a data , @default(now()) --> A data será a atual
   updatedAt DateTime @updatedAt // @updatedAt --> Quando fizer um update usando o prisma, o campo updatedAt será preenchido com a data atual
 
+  tasks Task[] // Relaciona a tabela User com a tabela Task
   fotos Foto[] // Relaciona a tabela User com a tabela Foto
 
   @@map("users") // Renomeia o nome da tabela de User para users
@@ -33,6 +34,8 @@ model Task {
   ownerId Int // id do usuário que vai criar a task(tarefa)
   content String // conteúdo da task(tarefa)
 
+  user User? @relation(fields: [ownerId], references: [id]) // ownerId da tabela Task está relacionado o id da tabela User
+
   @@map("tasks") // Renomeia o nome da tabela de Task para tasks
 }
 
@@ -43,7 +46,7 @@ model Foto {
   url          String
   public_id    String
 
-  user User? @relation(fields: [ownerId], references: [id]) // ownerId da tabela Foto está relacionado a id da tabela User
+  user User? @relation(fields: [ownerId], references: [id]) // ownerId da tabela Foto está relacionado o id da tabela User
 
   @@map("fotos") // Renomeia o nome da tabela de Foto para fotos
 }

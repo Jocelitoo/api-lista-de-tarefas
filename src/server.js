@@ -1,17 +1,34 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { resolve } from 'path';
+import cors from 'cors';
+import helmet from 'helmet';
 import { routes } from './routes/indexRoutes';
 
 dotenv.config();
 
+const whiteList = [ // URL(dominio) dos sites que podem consumir a API
+  'http://localhost:3000',
+];
+
+const corsOptions = {
+  origin(origin, callback) { // Esse origin retorna o domínio que está tentando acessar a aplicação, pode ser undefined
+    if (whiteList.indexOf(origin) !== -1 || !origin) { // Verifica se o origin(domínio) tentando acessar a Api está dentro da whiteList OU se ela não existe(caso seja undefined)
+      callback(null, true);
+    } else {
+      callback(new Error('Not aloweed by CORS'));
+    }
+  },
+};
+
 const app = express();
 
-const port = process.env.PORT ?? 4000;
-
 app.use(express.json()); // Usado para fazer o express realizar o parse de JSON para dentro da aplicação
-app.use(routes);
-app.use('/images', express.static(resolve(__dirname, '..', 'uploads', 'images'))); // Usado para permitir acessar a URL das imagens salvas na base de dados
 app.use(express.urlencoded({ extended: true })); // Usado para fazer o express retornar um objeto com os dados que receberam post, sem ele o sistema da erro na hora da criação do token quando a api está no ar
+
+app.use(routes);
+app.use(helmet);
+app.use(cors(corsOptions));
+
+const port = process.env.PORT ?? 4000;
 
 app.listen(port, () => console.log(`Servidor rodando na porta ${port}`));
