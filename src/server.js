@@ -7,7 +7,8 @@ import { routes } from './routes/indexRoutes';
 dotenv.config();
 
 const whiteList = [ // URL(dominio) dos sites que podem consumir a API
-  '187.86.202.116:3000',
+  '187.86.202.116:4000',
+  'http://localhost:4000/',
 ];
 
 const corsOptions = {
