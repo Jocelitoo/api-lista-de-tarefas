@@ -1,24 +1,24 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import cors from 'cors';
+// import cors from 'cors';
 import helmet from 'helmet';
 import { routes } from './routes/indexRoutes';
 
 dotenv.config();
 
-const whiteList = [ // URL(dominio) dos sites que podem consumir a API
-  'http://localhost:3000',
-];
+// const whiteList = [ // URL(dominio) dos sites que podem consumir a API
+//   'http://localhost:3000',
+// ];
 
-const corsOptions = {
-  origin(origin, callback) { // Esse origin retorna o domínio que está tentando acessar a aplicação, pode ser undefined
-    if (whiteList.indexOf(origin) !== -1 || !origin) { // Verifica se o origin(domínio) tentando acessar a Api está dentro da whiteList OU se ela não existe(caso seja undefined)
-      callback(null, true);
-    } else {
-      callback(new Error('Not aloweed by CORS'));
-    }
-  },
-};
+// const corsOptions = {
+//   origin(origin, callback) { // Esse origin retorna o domínio que está tentando acessar a aplicação, pode ser undefined
+//     if (whiteList.indexOf(origin) !== -1 || !origin) { // Verifica se o origin(domínio) tentando acessar a Api está dentro da whiteList OU se ela não existe(caso seja undefined)
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not aloweed by CORS'));
+//     }
+//   },
+// };
 
 const app = express();
 
@@ -27,7 +27,7 @@ app.use(express.urlencoded({ extended: true })); // Usado para fazer o express r
 
 app.use(routes);
 app.use(helmet);
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 const port = process.env.PORT ?? 4000;
 
