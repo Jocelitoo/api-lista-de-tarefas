@@ -7,8 +7,7 @@ import { routes } from './routes/indexRoutes';
 dotenv.config();
 
 const whiteList = [ // URL(dominio) dos sites que podem consumir a API
-  '187.86.202.116:4000',
-  'http://localhost:4000/',
+  'http://localhost:3000',
 ];
 
 const corsOptions = {
@@ -25,6 +24,13 @@ const app = express();
 
 app.use(express.json()); // Usado para fazer o express realizar o parse de JSON para dentro da aplicação
 app.use(express.urlencoded({ extended: true })); // Usado para fazer o express retornar um objeto com os dados que receberam post, sem ele o sistema da erro na hora da criação do token quando a api está no ar
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3000'); // '*' permite qualquer origem, troque para uma origem específica se necessário
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
 
 app.use(routes);
 app.use(helmet());
