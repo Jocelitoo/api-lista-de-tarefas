@@ -26,7 +26,7 @@ app.use(express.json()); // Usado para fazer o express realizar o parse de JSON 
 app.use(express.urlencoded({ extended: true })); // Usado para fazer o express retornar um objeto com os dados que receberam post, sem ele o sistema da erro na hora da criação do token quando a api está no ar
 
 app.use(routes);
-app.use(helmet);
+app.use(helmet());
 // app.use(cors(corsOptions));
 
 const port = process.env.PORT ?? 4000;
