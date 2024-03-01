@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: true })); // Usado para fazer o express r
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://localhost:3000'); // '*' permite qualquer origem, troque para uma origem específica se necessário
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE'); // Métodos permitidos
-  res.header('Access-Control-Allow-Headers', 'Content-Type, authorization'); // Headers permitidos
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Headers permitidos
   next();
 });
 
