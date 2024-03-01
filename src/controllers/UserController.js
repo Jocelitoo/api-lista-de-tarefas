@@ -133,12 +133,8 @@ class UserController {
         });
       }
 
-      // Pegar todas as tasks(tarefas) que possuam o ownerId com o mesmo valor do id passado no parametro
-      const tasks = await prisma.task.findMany({ where: { ownerId: reqId }, select: { id: true, content: true } }); // Prisma acessa o model(tabela) 'task' e pega todas as tarefas que tem o ownerID com o mesmo valor do reqId e select vai pegar somento id e content
-
       return res.json({
         usuário: user,
-        tarefas: tasks,
       });
     } catch (e) {
       return res.status(400).json({
