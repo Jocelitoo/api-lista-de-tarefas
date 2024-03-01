@@ -3,13 +3,16 @@ import { prisma } from '../client';
 
 export async function loginRequired(req, res, next) {
   // Pegar o token enviado na requisição
-  const { token } = req.headers; // Pega o token enviado no headers da requisição
+  const { authorization } = req.headers; // Pega o authorization enviado no headers da requisição que é 'Bearer token'
 
-  if (!token) {
+  if (!authorization) {
     return res.status(401).json({
       error: ['Login required'],
     });
   }
+
+  // eslint-disable-next-line no-unused-vars
+  const [texto, token] = authorization.split(' '); // Separa o 'Bearer' do 'token'
 
   try {
     // Decodificar o token

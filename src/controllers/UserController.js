@@ -117,6 +117,7 @@ class UserController {
               id: true,
               content: true,
             },
+            orderBy: 'desc',
           },
           fotos: {
             select: {
