@@ -155,7 +155,9 @@ class UserController {
       const formErrorMsg = [];
 
       if (reqName.length < 2 || reqName.length > 20) formErrorMsg.push('Campo NOME precisa ter entre 2 e 20 caracteres');
+
       if (!isEmail(reqEmail)) formErrorMsg.push('EMAIL inválido');
+
       if (reqPassword) { // Validação do password só será necessário se o usuário quiser altera-lo, se n existir é pq o usuário não quer altera-lo
         if (reqPassword.length < 8 || reqPassword.length > 20) formErrorMsg.push('Campo SENHA precisa ter entre 8 e 20 caracteres');
       }
@@ -195,16 +197,31 @@ class UserController {
       }
 
       // Criptografar password
-      const reqPasswordHash = await bcryptjs.hash(reqPassword, 8);
+      let reqPasswordHash = '';
+
+      if (reqPassword) {
+        reqPasswordHash = await bcryptjs.hash(reqPassword, 8);
+      }
 
       // Atualizar usuario
-      const updateUser = await prisma.user.update({
-        where: { id: user.id },
-        data: { name: reqName, email: reqEmail, password: reqPasswordHash },
-        select: {
-          id: true, name: true, email: true,
-        },
-      });
+      let updateUser = '';
+      if (reqPassword) {
+        updateUser = await prisma.user.update({
+          where: { id: user.id },
+          data: { name: reqName, email: reqEmail, password: reqPasswordHash },
+          select: {
+            id: true, name: true, email: true,
+          },
+        });
+      } else {
+        updateUser = await prisma.user.update({
+          where: { id: user.id },
+          data: { name: reqName, email: reqEmail },
+          select: {
+            id: true, name: true, email: true,
+          },
+        });
+      }
 
       return res.json(updateUser);
     } catch (e) {
