@@ -156,7 +156,7 @@ class UserController {
 
       if (reqName.length < 2 || reqName.length > 20) formErrorMsg.push('Campo NOME precisa ter entre 2 e 20 caracteres');
       if (!isEmail(reqEmail)) formErrorMsg.push('EMAIL inválido');
-      if (reqPassword.length > 0) { // Validação do password só será necessário se o usuário quiser altera-la, se estiver vazio é pq o usuário não quer altera-la
+      if (reqPassword) { // Validação do password só será necessário se o usuário quiser altera-lo, se n existir é pq o usuário não quer altera-lo
         if (reqPassword.length < 8 || reqPassword.length > 20) formErrorMsg.push('Campo SENHA precisa ter entre 8 e 20 caracteres');
       }
 
