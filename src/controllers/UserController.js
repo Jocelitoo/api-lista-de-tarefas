@@ -120,6 +120,7 @@ class UserController {
           },
           fotos: {
             select: {
+              id: true,
               url: true,
               public_id: true,
             },
