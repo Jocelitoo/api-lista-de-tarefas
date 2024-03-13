@@ -8,7 +8,7 @@ dotenv.config();
 
 const whiteList = [ // URL(dominio) dos sites que podem consumir a API
   'http://localhost:3000',
-  'https://lista-de-tarefassss.netlify.app/',
+  'https://lista-de-tarefassss.netlify.app',
 ];
 
 const corsOptions = {
