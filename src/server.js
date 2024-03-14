@@ -27,7 +27,7 @@ app.use(express.json()); // Usado para fazer o express realizar o parse de JSON 
 app.use(express.urlencoded({ extended: true })); // Usado para fazer o express retornar um objeto com os dados que receberam post, sem ele o sistema da erro na hora da criação do token quando a api está no ar
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://lista-de-tarefassss.netlify.app/'); // '*' permite qualquer origem, troque para uma origem específica se necessário
+  res.header('Access-Control-Allow-Origin', 'https://lista-de-tarefassss.netlify.app'); // '*' permite qualquer origem, troque para uma origem específica se necessário
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE'); // Métodos permitidos
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Headers permitidos
   next();
